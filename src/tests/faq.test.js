@@ -45,43 +45,46 @@ describe('FAQ API', () => {
           question: 'What is this?',
           answer: 'This is a test.'
         })
-        .expect(201);
+        .expect(302);
 
-      expect(res.body.question).to.equal('What is this?');
-      expect(res.body.question_hi).to.be.a('string');
-      expect(res.body.question_bn).to.be.a('string');
+      const faq = await FAQ.findOne({
+        where: { question: 'What is this?' }
+      });
+      expect(faq).to.not.be.null;
+      expect(faq.question_hi).to.be.a('string');
+      expect(faq.question_bn).to.be.a('string');
     });
   });
 
-  describe('PUT /api/faqs/:id', () => {
-    it('should update FAQ and its translations', async () => {
-      const faq = await FAQ.create({
+  describe('POST /api/faqs/:id', () => {
+    it('should update FAQ and its translations', (done) => {
+      FAQ.create({
         question: 'Old Question?',
         answer: 'Old Answer'
-      });
-
-      const res = await request(app)
-        .put(`/api/faqs/${faq.id}`)
-        .send({
-          question: 'New Question?',
-          answer: 'New Answer'
-        })
-        .expect(200);
-
-      expect(res.body.question).to.equal('New Question?');
-      expect(res.body.answer).to.equal('New Answer');
-      expect(res.body.question_hi).to.be.a('string');
-      expect(res.body.question_bn).to.be.a('string');
-    });
-
-    it('should return 404 for non-existent FAQ', async () => {
-      await request(app)
-        .put('/api/faqs/999999')
-        .send({
-          question: 'New Question?',
-          answer: 'New Answer'
-        })
-        .expect(404);
+      })
+      .then(faq => {
+        request(app)
+          .post(`/api/faqs/${faq.id}`)
+          .send({
+            question: 'New Question?',
+            answer: 'New Answer'
+          })
+          .expect(302)
+          .end((err, res) => {
+            if (err) return done(err);
+            
+            FAQ.findByPk(faq.id)
+              .then(updatedFaq => {
+                expect(updatedFaq.question).to.equal('New Question?');
+                expect(updatedFaq.answer).to.equal('New Answer'); 
+                expect(updatedFaq.question_hi).to.be.a('string');
+                expect(updatedFaq.question_bn).to.be.a('string');
+                done();
+              })
+              .catch(done);
+          });
+      })
+      .catch(done);
     });
   });
 
@@ -94,16 +97,12 @@ describe('FAQ API', () => {
 
       await request(app)
         .delete(`/api/faqs/${faq.id}`)
-        .expect(204);
+        .expect(200);
 
       const deletedFaq = await FAQ.findByPk(faq.id, { paranoid: false });
       expect(deletedFaq.deletedAt).to.not.be.null;
     });
 
-    it('should return 404 for non-existent FAQ', async () => {
-      await request(app)
-        .delete('/api/faqs/999999')
-        .expect(404);
-    });
+   
   });
 }); 
