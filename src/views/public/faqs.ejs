@@ -1,0 +1,46 @@
+<div class="container">
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <h2>Frequently Asked Questions</h2>
+        </div>
+        <div class="col-md-6 text-end">
+            <form action="/" method="GET" class="d-inline">
+                <select class="form-select w-auto ms-auto language-selector" name="lang" onchange="this.form.submit()">
+                    <option value="en" <%= lang === 'en' ? 'selected' : '' %>>English</option>
+                    <option value="hi" <%= lang === 'hi' ? 'selected' : '' %>>Hindi</option>
+                    <option value="bn" <%= lang === 'bn' ? 'selected' : '' %>>Bengali</option>
+                </select>
+            </form>
+        </div>
+    </div>
+
+    <div class="accordion" id="faqAccordion">
+        <% faqs.forEach((faq, index) => { %>
+            <div class="accordion-item">
+                <h2 class="accordion-header">
+                    <button class="accordion-button <%= index === 0 ? '' : 'collapsed' %>" type="button" 
+                            data-bs-toggle="collapse" data-bs-target="#faq<%= index %>">
+                        <%= faq.question %>
+                    </button>
+                </h2>
+                <div id="faq<%= index %>" class="accordion-collapse collapse <%= index === 0 ? 'show' : '' %>"
+                     data-bs-parent="#faqAccordion">
+                    <div class="accordion-body">
+                        <%- faq.answer %>
+                    </div>
+                </div>
+            </div>
+        <% }); %>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const languageSelect = document.getElementById('languageSelect');
+    languageSelect.addEventListener('change', function() {
+        const selectedLang = this.value;
+        console.log(selectedLang,"ddddddddddd");
+        window.location.href = `/?lang=${selectedLang}`;
+    });
+});
+</script>

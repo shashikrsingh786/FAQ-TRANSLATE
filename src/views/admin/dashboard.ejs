@@ -1,0 +1,77 @@
+
+
+
+<div class="container">
+    <h2>FAQ Management Dashboard</h2>
+    
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <a href="/admin/faq/new" class="btn btn-primary mb-3">Add New FAQ</a>
+            
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">FAQ List</h5>
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Question</th>
+                                    <th>Answer</th>
+                                    <th>Languages</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% faqs.forEach(faq => { %>
+                                <tr>
+                                    <td><%= faq.question %></td>
+                                    <td><%- faq.answer %></td>
+                                    <td>
+                                        <span class="badge bg-primary">EN</span>
+                                        <% if (faq.question_hi) { %>
+                                            <span class="badge bg-success">HI</span>
+                                        <% } %>
+                                        <% if (faq.question_bn) { %>
+                                            <span class="badge bg-info">BN</span>
+                                        <% } %>
+                                    </td>
+                                    <td>
+                                        <a href="/admin/faq/edit/<%= faq.id %>" class="btn btn-sm btn-warning">Edit</a>
+                                        <button onclick="deleteFaq('<%= faq.id %>')" class="btn btn-sm btn-danger">Delete</button>
+                                    </td>
+                                </tr>
+                                <% }); %>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function deleteFaq(id) {
+        if (confirm('Are you sure you want to delete this FAQ?')) {
+            fetch(`/api/faqs/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('FAQ deleted successfully!');
+                    window.location.href = '/admin/dashboard';
+                } else {
+                    alert('Failed to delete FAQ!');
+                }
+            })
+            .catch(error => {
+                console.error('Error deleting FAQ:', error);
+                alert('Failed to delete FAQ!');
+            });
+        }
+    }
+</script>
